@@ -1,0 +1,64 @@
+//Fazer um programa em C que pergunta um valor em metros e imprime o correspondente em decímetros, centímetros e milímetros.
+
+
+#include <stdio.h>
+int main ()
+{
+   float valor;
+
+   printf("Insira um valor: ");
+   scanf("%f", &valor);
+
+   float dec = (valor/10);
+   float cent = (valor/100);
+   float mili = (valor/1000);
+   
+   printf("Decimetros: %f \n Centimetros: %f \n Milimetros: %f", dec, cent, mili);  
+
+return 0;
+}
+CCCC
+#include <stdio.h>
+int main ()
+{
+   float valor;
+   int i = 1;
+   
+   printf("Insira um valor: ");
+   scanf("%f", &valor);
+
+   while (i<=3)
+  {
+    valor = valor/10;
+    printf("%f", valor);
+    i++;
+    printf ("\n");
+  } 
+   
+
+return 0;
+
+}
+
+
+
+
+
+
+#include <stdio.h>
+
+int main()
+{
+  int num;
+  int i = 0;
+  printf("Insira um número: ");
+  scanf("%d", &num);
+
+  printf ("Imprimindo a tabuada do %d \n", num);
+  for (i = 0; i<=10; i++)
+  {
+    printf (" %d x % d = %d", num , i, num*i);
+    printf("\n");
+  }
+  return 0;
+}
