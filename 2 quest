@@ -1,0 +1,40 @@
+
+ #include<stdio.h>
+int main ()
+{
+// declarando as váriáveis 
+  int quantd;
+  float mvalor; 
+
+    printf("Insira quantas maçãs você irá comprar:  ");
+    scanf("%d", &quantd);
+
+    if (quantd < 0)
+    {
+        printf("Valor inválido."); \\termina se o numero de maças for negativo
+        return 0;
+    }
+    else  \\ Analise dos valores para determinar a 2 variavel 
+      if (quantd < 12)
+      {
+          mvalor = 0.30;
+      }
+      else 
+        if (quantd >= 12)
+        {
+            mvalor = 0.25;
+        }
+        else 
+        {
+          printf("Valor inválido.");  //caso o usuário insira um character 
+          return 0;
+        }
+
+    printf("Valor total da compra: %f", mvalor * quantd);
+
+  return 0;
+}
+
+
+ 
+      
