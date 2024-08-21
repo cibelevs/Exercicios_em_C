@@ -1,0 +1,29 @@
+#include<stdio.h>
+int main ()
+{
+  int num, i;
+  int fat = 1;
+
+  printf("Insira um número");
+  scanf ("%d", &num);
+
+  if (num < 0)
+  {
+     printf("Número inválido.");
+  }
+  else 
+    if (num == 1)
+    {
+      printf ("Fatorial de 1: 1");
+    }
+    else 
+    {
+       for(i= 1; i <= num; i++)
+       {
+           fat = fat * i;
+       }
+       printf ("Fatorial de %d: %d", num , fat);
+    }
+  
+  return 0;
+}
