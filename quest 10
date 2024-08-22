@@ -1,0 +1,28 @@
+/Faça um programa em C que leia uma sequência de números inteiros (a sequência termina 
+//quando o usuário digitar um número negativo) e exiba o maior número digitado
+
+#include <stdio.h>
+int main ()
+{
+    int num;
+    int maior = 0;
+    
+    printf("Insira um número: ");
+    scanf("%d", &num);
+    maior = num;
+    
+    while (num >= 0)
+    {
+        printf("Insira um número: ");
+        scanf("%d", &num);
+        
+        if (num > maior)
+        {
+            num = maior;
+        }
+    }
+    
+    printf ("Maior número: %d", maior);
+    
+    return 0;
+}
