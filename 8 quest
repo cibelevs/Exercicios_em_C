@@ -1,0 +1,24 @@
+//Escreva um algoritmo em C que leia uma série de números inteiros 
+//(a entrada termina quando o número 0 é digitado) e exiba a soma desses números.
+
+#include<stdio.h>
+int main ()
+{
+  int num;
+  int soma = 0;
+  
+  printf ("Insira um numero: ");
+  scanf ("%d", & num);
+  
+    while (num != 0)
+    {
+        soma = num + soma;
+        printf ("Insira um numero: ");
+        scanf ("%d", & num);
+        
+    }
+    
+    printf ("Valor total: %d", soma);
+
+  return 0;
+}
