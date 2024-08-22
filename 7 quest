@@ -1,0 +1,22 @@
+#include<stdio.h>
+int main ()
+{
+//Declarando variáveis 
+  int num, tab;
+  int i = 0;
+
+// input do usuário
+printf("Insira um número");
+scanf("%d", &num);
+
+printf("Tabuada do %d \n", num);
+
+// loop para multiplicar o num de 1 a 10
+while (i<=10)
+{
+  tab = num * i;
+  printf ( "%d x %d = %d \n" , num , i, tab);
+  i++;
+}
+  return 0;
+}
