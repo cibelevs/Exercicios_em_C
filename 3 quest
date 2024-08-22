@@ -1,0 +1,22 @@
+// Escreva um programa em C que leia um número inteiro e exiba
+//todos os números ímpares de 1 até esse número.
+
+#include<stdio.h>
+int main ()
+{
+    int num;
+    
+    printf("Insira um número: ");
+    scanf("%d", &num);
+    
+    for (int i = 1; i<= num;i++)
+    {
+        if ( i % 2 != 0)
+        {
+            printf(" %d ", i);
+        }
+    }
+    
+    
+    return 0;
+}
