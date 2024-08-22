@@ -1,0 +1,23 @@
+//Crie um programa em C que leia uma temperatura em graus Celsius e a converta para Fahrenheit. 
+//O programa deve exibir a mensagem "Frio" se a temperatura em Fahrenheit for menor que 50,
+//e "Quente" se for maior ou igual a 50.
+
+#include <stdio.h>
+int main ()
+{
+    float tempC, tempF;
+    
+    printf ("Insira a temperatura: ");
+    scanf("%f", &tempC);
+    
+    tempF = 1.8 * tempC + 32;
+    
+    if (tempF < 50)
+    {
+        printf("Frio");
+    }
+    else 
+        printf("Quente");
+    
+    return 0;
+}
