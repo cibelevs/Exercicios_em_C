@@ -1,0 +1,20 @@
+//Faça um programa que implemente um menu onde o usurário deverá selecionar 1 ou 0.
+//Caso seja entrado um número diferente, o programa deverá solicitar uma nova opção
+
+#include<stdio.h>
+
+int main ()
+{
+    int num;
+    
+    printf("Selecione 1 ou 0: ");
+    scanf("%d", &num);
+    
+    while (num != 0 && num != 1)
+    {
+        printf("Número inválido.Insira uma das opções acima: ");
+        scanf("%d", &num);
+    }
+
+    return 0;
+}
