@@ -22,3 +22,4 @@ int main()
     
     return 0;
 }
+\\adicionar um while que obrigue o usuário a usar um número maior que 2//
