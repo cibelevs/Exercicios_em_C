@@ -1,0 +1,27 @@
+#include<stdio.h>
+//Definindo as macros e fazendo as comparações
+#define MIN(x, y)  ((x) < (y) ? (x) : (y)) //Condicional: se x < y então x, senão y 
+#define MAX(x, y)  ((x) > (y) ? (x) : (y)) //Condicional: se x > y então x, senão y 
+int main ()
+{
+   //Declarando as variáveis 
+   int a, b;
+   int i = 0;
+
+  //Loop para as obter valores e imprimir o MAX e MIN
+   while (i < 2)
+   {
+      printf ("Insira o valor de x: ");
+      scanf("%d", &a);
+
+      printf ("Insira o valor de y: ");
+      scanf("%d", &b);
+      
+      printf("Para os valores %d e %d \n", a, b);
+      printf ("Menor valor %d \n", MIN (a, b));
+      printf ("Maior valor %d \n", MAX (a, b));
+
+      i++;
+   }
+   return 0;
+}
