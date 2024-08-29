@@ -1,0 +1,44 @@
+#ifndef CALCULADORA_H
+#define CALCULADORA_H
+
+int adicao (int a, int b);
+int subtracao (int a, int b);
+
+#endif // CALCULADORA_H
+
+
+
+#include "calculadora.h"
+
+int adicao(int a, int b) {
+    return a + b;
+}
+
+int subtracao(int a, int b) {
+    return a - b;
+}
+
+
+#include<stdio.h>
+#include "calculadora.h"
+
+int main (void)
+{
+  int num1, num2;
+
+  printf ("Insira um valor: \n");
+  scanf("%d", &num1);
+
+  printf ("Insira um valor: \n");
+  scanf("%d", &num2);
+
+   printf("Soma: %d\n", adicao(num1, num2));
+   printf("Subtração: %d\n", subtracao(num1, num2));
+ 
+ return 0;
+}
+
+!g++ -c calculadora.cpp -o calculadora.o
+!g++ -c main.cpp -o main.o
+!g++ main.o calculadora.o -o main
+!./main
