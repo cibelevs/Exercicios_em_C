@@ -1,0 +1,41 @@
+//Exercício 2: Encontre o Maior e menorElemento em um Array
+#include <stdio.h>
+void encontra_maior (int arr[], int n)
+{
+  int maior = arr[0];
+  int menor = arr[0];
+
+  for(int i = 0 ; i < n; i++)
+  {
+      if (maior < arr[i])
+      {
+        maior = arr[i];
+      }
+      if (menor > arr[i])
+      {
+        menor = arr[i];
+      }
+  }
+  printf("%d\n", maior);
+  printf("%d", menor);
+
+}
+
+int main (void)
+{
+  int tam;
+  printf("Insira o tamanho do array: ");
+  scanf("%d", &tam);
+
+  int array[tam];
+
+  for (int i=0; i<tam; i++)
+  {
+    printf("%d elemento do array: ", i);
+    scanf("%d", & array[i]);
+  }
+
+  encontra_maior(array, tam);
+  
+}
+
