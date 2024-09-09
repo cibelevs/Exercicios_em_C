@@ -1,0 +1,12 @@
+// imprimindo um número ao contrário
+#include<stdio.h>
+int main ()
+{
+    int num;
+    printf("Insira um número apartir de dois dígitos: ");
+    scanf("%d", &num);
+
+    printf("%d, %d", num % 10, num/10)
+
+return 0;
+}
