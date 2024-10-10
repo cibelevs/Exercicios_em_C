@@ -64,6 +64,11 @@ void imprimir_bordas()
      putch('\n');
    }
 }
+//comida da cobra
+void colocar_comida()
+{
+    mapa_jogo[8*COLUNA + 4] = '+';
+}
 
 
 
@@ -137,9 +142,11 @@ int main ()
     {
       incializando_mapa();
       montar_bordas();
+      colocar_comida();
       desenho_cobra();
       imprimir_bordas();
       teclado_acoes();
+
 
     }
 
