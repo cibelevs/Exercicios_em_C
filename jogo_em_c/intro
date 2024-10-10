@@ -17,13 +17,16 @@
 
 #define LINHA 10
 #define COLUNA 20
+#define TAM_MAX_COBRA 200
+int gameover = 0;
 
-//não entendi porque de multiplicar
+
+//vetor unidimensional para facilitar o armazenamento
 char mapa_jogo[COLUNA*LINHA];
+
 
 //função permite que o mapa começe vazio,
 //para depois preencher e imprimir as bordas
-
 void incializando_mapa()
 {
     int i;
@@ -38,13 +41,13 @@ void montar_bordas()
 {
    int x, y;
 
-   for (y=0; y<LINHA;y++)
-    {
-     for (x=0; x<COLUNA; x++)
-     {
-        if (x ==0||y ==0||x ==COLUNA-1||y ==LINHA-1)
-        {
-            mapa_jogo[y*COLUNA + x] = '#';
+   for (y=0; y<LINHA;y++)  {
+     for (x=0; x<COLUNA; x++) {
+        if (x ==0||y ==0||x ==COLUNA-1||y ==LINHA-1) {
+            mapa_jogo[y*COLUNA + x] = '#'; //preenchendo borda
+        }
+         else {
+            mapa_jogo[y*COLUNA + x] = ' '; //oque n é borda preenche com espaço vazio
         }
      }
    }
@@ -54,24 +57,91 @@ void imprimir_bordas()
 {
   int x, y;
 
-   for (y=0; y<LINHA;y++)
-   {
-     for (x=0; x<COLUNA; x++)
-     {
-       putch(mapa_jogo[y*COLUNA + x]); //estudar função putch
+   for (y=0; y<LINHA;y++) {
+     for (x=0; x<COLUNA; x++) {
+       putch( mapa_jogo[y*COLUNA+x]);
      }
      putch('\n');
    }
-
 }
 
 
 
-int main (int argc, char **argv)
+//cobra
+
+struct partes_cobra{
+    int a; //eixo X da cobra
+    int b; //eixo Y da cobra
+};
+
+struct cobra{
+    int tamanho; //numero de elemnetos = cabeça+corpo
+    struct partes_cobra corpo_cobra[TAM_MAX_COBRA]; //definindo vetor com tamanho máximo da cobra
+
+};
+
+struct cobra Cobra;
+
+
+void desenho_cobra()
 {
-    incializando_mapa();
-    montar_bordas();
-    imprimir_bordas();
+    int i;
+    for(i = Cobra.tamanho-1; i > 0; i--) {
+        mapa_jogo[Cobra.corpo_cobra[i].b*COLUNA + Cobra.corpo_cobra[i].a] = '*'; //definindo corpo
+    }
+    mapa_jogo[Cobra.corpo_cobra[0].b*COLUNA + Cobra.corpo_cobra[0].a] = '0'; //definindo cabeça
+
+}
+
+void mover_cobra(int X, int Y)
+{
+    int i;
+    //corpo seguindo a cabeça da cobra, de acordo com as direções de X e Y
+     for(i = Cobra.tamanho-1; i>0; i--) {
+         Cobra.corpo_cobra[i] =  Cobra.corpo_cobra[i - 1];
+     }
+    Cobra.corpo_cobra[0].a += X;
+    Cobra.corpo_cobra[0].b += Y;
+}
+
+//lendo o teclado
+void teclado_acoes ()
+{
+    int movimento = getch();
+    switch (movimento) {
+        case 'w': mover_cobra(0, -1); //movendo para cima
+        break;
+
+        case 's': mover_cobra(0, 1); //movendo para baixo
+        break;
+
+        case 'a': mover_cobra(-1, 0); //movendo para esquerda
+        break;
+
+        case 'd': mover_cobra(1, 0);//movendo para direita
+        break;
+    }
+}
+//int main (int argc, char **argv)
+
+int main ()
+{
+   Cobra.tamanho = 2;
+   Cobra.corpo_cobra[0].a = 5; //cabeça da cobra
+   Cobra.corpo_cobra[0].b = 5;
+   Cobra.corpo_cobra[1].a = 5; //corpo da cobra
+   Cobra.corpo_cobra[1].b = 6;
+
+  //fazer isso enquanto jogo não acabou
+   while (!gameover)
+    {
+      incializando_mapa();
+      montar_bordas();
+      desenho_cobra();
+      imprimir_bordas();
+      teclado_acoes();
+
+    }
 
     return 0;
 }
