@@ -1,0 +1,244 @@
+#include<stdio.h>
+#include<conio.h>
+#include<stdlib.h>
+#include<time.h>
+#include<windows.h>
+
+
+#define LINHA 20
+#define COLUNA 20
+#define TAM_MAX_COBRA 200
+#define FOOD 10
+
+int gameover = 0;
+
+//essa função permite que o mapa do jogo fique parado!
+void resetar() {
+    printf("\033[H");
+}
+
+//vetor unidimensional para facilitar o armazenamento
+char mapa_jogo[COLUNA*LINHA];
+
+//função permite que o mapa começe vazio,
+//para depois preencher e imprimir as bordas
+void incializando_mapa() {
+    int i;
+    for (i=0; i<COLUNA*LINHA;i++) {
+        mapa_jogo[i] = ' ';
+    }
+}
+
+//montando função para delimitar as bordas do mapa
+void montar_bordas() {
+   int x, y;
+
+   for (y=0; y<LINHA;y++)  {
+     for (x=0; x<COLUNA; x++) {
+        if (x ==0||y ==0||x ==COLUNA-1||y ==LINHA-1) {
+            mapa_jogo[y*COLUNA + x] = '#'; //preenchendo borda
+        } else {
+            mapa_jogo[y*COLUNA + x] = ' '; //oque n é borda preenche com espaço vazio
+        }
+     }
+   }
+}
+//imprimindo as bordas
+void imprimir_bordas() {
+  int x, y;
+
+   for (y=0; y<LINHA;y++) {
+     for (x=0; x<COLUNA; x++) {
+       printf(" %c", mapa_jogo[y*COLUNA+x]); //troquei o putch por putchar imprime apenas um caractere
+     }
+     printf("\n");
+   }
+}
+//comida
+struct comida {
+    int x, y;
+    int consumido;
+};
+
+struct comida Comida[FOOD];
+
+void inicializando_comida() {
+    int i;
+    for (i=0; i<FOOD; i++) {
+      Comida[i].x = 1 + rand()  % (COLUNA - 2); //returns to a pseudo_random
+      Comida[i].y = 1 + rand() % (LINHA - 2);
+      Comida[i].consumido = 0;
+    }
+}
+
+void colocar_comida() {
+   int i;
+    for (i = 0; i < FOOD; i++) {
+        if (!Comida[i].consumido) {
+            // Ajuste no acesso à posição do mapa
+            mapa_jogo[Comida[i].y * COLUNA + Comida[i].x] = '+';
+        }
+    }
+}
+
+//cobra
+struct partes_cobra{
+    int a, b; //eixo X e eixo Y da cobra
+};
+
+struct cobra{
+    int tamanho; //numero de elemnetos = cabeça+corpo
+    struct partes_cobra corpo_cobra[TAM_MAX_COBRA]; //definindo vetor com tamanho máximo da cobra
+};
+
+struct cobra Cobra;
+
+void inicializando_cobra(){
+   Cobra.tamanho = 1;
+   Cobra.corpo_cobra[0].a = 1 + rand()  % (LINHA - 2); //cabeça da cobra
+   Cobra.corpo_cobra[0].b = 1 + rand()  % (COLUNA - 2);
+
+}
+
+void desenho_cobra() {
+    int i;
+    // Desenhando o corpo da cobra (da cauda até a cabeça, exceto a cabeça)
+    for (i = Cobra.tamanho - 1; i > 0; i--) {
+        mapa_jogo[Cobra.corpo_cobra[i].b * COLUNA + Cobra.corpo_cobra[i].a] = '*'; // Definindo o corpo
+    }
+    // Desenhando a cabeça da cobra
+    mapa_jogo[Cobra.corpo_cobra[i].b * COLUNA + Cobra.corpo_cobra[i].a] = '@'; // Definindo a cabeça
+                                   //i ou 0
+}
+
+void mover_cobra(int X, int Y) {
+    int i;
+    //corpo seguindo a cabeça da cobra, de acordo com as direções de X e Y
+     for(i = Cobra.tamanho-1; i>0; i--) {
+         Cobra.corpo_cobra[i] =  Cobra.corpo_cobra[i - 1];
+     }
+    Cobra.corpo_cobra[0].a += X;
+    Cobra.corpo_cobra[0].b += Y;   //a cobra não pode se mover na direção oposta!mudar isso
+}
+
+int direcao_atual = 0;
+
+void mover_cobra_com_direcao() {
+    switch (direcao_atual) {
+        case 0: mover_cobra(0, -1); break; // Cima
+        case 1: mover_cobra(0, 1); break;  // Baixo
+        case 2: mover_cobra(-1, 0); break; // Esquerda
+        case 3: mover_cobra(1, 0); break;  // Direita
+    }
+}
+
+
+
+void atualizar (int nova_direcao) {
+    if ((direcao_atual == 0 && nova_direcao == 1) || // Cima -> Baixo
+        (direcao_atual == 1 && nova_direcao == 0) || // Baixo -> Cima
+        (direcao_atual == 2 && nova_direcao == 3) || // Esquerda -> Direita
+        (direcao_atual == 3 && nova_direcao == 2)) { // Direita -> Esquerda
+        return; // Impede que a cobra se mova na direção oposta
+    }
+    direcao_atual = nova_direcao;
+}
+
+//lendo o teclado
+void teclado_acoes() {
+
+    if(_kbhit){
+    int movimento = getch(); //getch() captura a tecla pressionada sem a necessidade de pressionar "Enter".
+
+    if (movimento == 0 || movimento == 224) // Teclas de seta retornam esses códigos de escape antes da tecla real
+    {
+        movimento = getch();
+    }
+    switch (movimento) {
+        //movendo com letras
+        case 'w': atualizar(0);   break;
+
+        case 's': atualizar(1);  break;
+
+        case 'a': atualizar(2);   break;
+
+        case 'd': atualizar(3);   break;
+
+        //movendo com setas do teclado
+        case 72 : atualizar(0);  break;
+
+        case 80: atualizar(1);     break;
+
+        case 75: atualizar(2);     break;
+
+        case 77: atualizar(3);     break;
+
+        default: printf("Utilize as setas o teclado ou as letras w, s, a, d para mover a cobra");
+        printf("\n Verifique se o caps lock está ativado");
+        break;
+      }
+    }
+}
+
+
+
+// Função de atraso usando um loop (menos eficiente)
+void delay(int milliseconds) {
+    clock_t start_time = clock();
+    while (clock() < start_time + milliseconds);
+}
+
+void regras_jogando() {
+    int i;
+    for (i=0; i<FOOD; i++) {
+        if (!Comida[i].consumido) {
+            if(Comida[i].x == Cobra.corpo_cobra[0].a && Comida[i].y == Cobra.corpo_cobra[0].b) {
+                Comida[i].consumido = 1;
+                Cobra.tamanho++;
+            }
+        }
+    }
+        //caso a cobra toque a borda
+        if (Cobra.corpo_cobra[0].a == 0 || Cobra.corpo_cobra[0].b == 0 || Cobra.corpo_cobra[0].a == COLUNA -1 || Cobra.corpo_cobra[0].b == LINHA-1 ){
+            gameover = 1;
+        }
+
+        //caso a cobra toque o próprio corpo
+        for (i = 1; i < Cobra.tamanho; i++) {
+            if (Cobra.corpo_cobra[0].a == Cobra.corpo_cobra[i].a && Cobra.corpo_cobra[0].b == Cobra.corpo_cobra[i].b) {
+                gameover = 1;
+            }
+        }
+}
+
+//int main (int argc, char **argv)
+int main() {
+    srand(time(0));  // Inicializa o gerador de números aleatórios
+
+    inicializando_cobra();    // Inicializa a cobra
+    inicializando_comida();   // Inicializa a comida
+
+    // Loop do jogo - executa enquanto o jogo não terminou
+    while (!gameover) {
+        resetar();            // Limpa a tela
+        incializando_mapa();  // Inicializa o mapa vazio
+        montar_bordas();      // Monta as bordas no mapa
+        colocar_comida();     // Coloca comida no mapa
+        desenho_cobra();      // Desenha a cobra no mapa
+        regras_jogando();     // Verifica se a cobra colidiu ou comeu comida
+        imprimir_bordas();    // Imprime o mapa atualizado
+        printf("Score: %d\n", Cobra.tamanho);  // Exibe a pontuação
+
+        teclado_acoes(); // Verifica as teclas pressionadas (movimenta a cobra)
+        mover_cobra_com_direcao();  // Move a cobra na direção atual automaticamente
+
+        delay(125);           // Pausa de 125 ms para controlar a velocidade da cobra
+    }
+
+    // Mensagem de fim de jogo
+    printf("\nYou are a loser. Why? Cuz you lost, silly!");
+    printf("\nFinal score: %d", Cobra.tamanho);  // Exibe a pontuação final
+
+    while(1) getch();
+    return 0;
+}
