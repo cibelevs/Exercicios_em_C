@@ -1,0 +1,25 @@
+#include<stdio.h>
+//Escreva uma função que recebe dois ponteiros para inteiros e troca seus valores.
+
+void muda_valor (int *ptr_1, int *ptr_2)
+{
+    int muda = *ptr_1;
+    
+    *ptr_1 = *ptr_2;
+    *ptr_2 = muda;
+}
+
+
+
+int main (void)
+{
+    int num1, num2;
+    
+    printf("Insira dois números diferentes: ");
+    scanf("%d", &num1);
+    scanf("%d", &num2);
+    
+    muda_valor(&num1, &num2);
+    
+    printf ("Número 1: %d \n Número 2: %d", num1, num2);
+}
