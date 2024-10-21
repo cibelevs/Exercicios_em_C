@@ -1,0 +1,25 @@
+#include<stdio.h>
+//Crie uma função que recebe dois ponteiros para inteiros e retorna a soma deles.
+
+int soma_valores (int *ptr_1, int *ptr_2)
+{
+    int soma = *ptr_1 + *ptr_2;
+    return soma;
+}
+
+
+int main ()
+{
+    int num1,  num2;
+    
+    printf("Insira um número: ");
+    scanf("%d", &num1);
+    
+    printf("Insira um número: ");
+    scanf("%d", &num2);
+    
+    printf("Soma dos valores: %d", soma_valores(&num1, &num2));
+    
+    
+    return 0;
+}
