@@ -1,0 +1,23 @@
+#include<stdio.h>
+
+void reverte_array (int *ponteiro, int tamanho)
+{
+    int i;
+    
+    for(i = tamanho - 1 ; i>= 0; i--)
+    {
+        printf(" %d", * (ponteiro + i)); //nesse, não é possível fazer com o *ponteiro++
+    }
+}
+
+int main (void)
+{
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int *array_pointer = array;
+    
+    int tam = sizeof(array)/sizeof(array[0]);
+    
+    reverte_array(array_pointer, tam);
+
+    return 0;
+}
