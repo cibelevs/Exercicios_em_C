@@ -1,0 +1,27 @@
+#include<stdio.h>
+
+void preenche_array (int * ponteiro, int tamanho)
+{
+    for (int i = 0; i< tamanho; i++) 
+    {
+        printf("Insira o valor %d do array: ", i);
+        scanf(" %d", ponteiro++); //pode usar tamnbém o *(ponteiro + i)
+    }
+}
+
+int main (void)
+{
+    int array [5]; //criando array
+    int * arr_ptr = array; //ponteiro pro array aponta diretamente para o primeiro elemento
+    
+    int tam = sizeof(array)/sizeof(array[0]); //encontrando o tamanho do array
+    
+    preenche_array(array, tam); //chama função
+    
+    for (int i = 0; i<tam; i++)
+    {
+        printf(" %d ", *(arr_ptr + i)); //pode usar também o arr_ptr++
+    }
+    
+    return 0;
+}
