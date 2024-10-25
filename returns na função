@@ -1,0 +1,28 @@
+#include<stdio.h>
+int somadoDigitos (int x)
+{
+    int soma = 0; //para armazenar os numeros separadamente
+    
+    if (x == 0)  // se x == 0, ou se x < 10
+    {
+        return x; //retorna o ultimo valor 
+    }
+    else 
+    {
+        soma += x % 10; // através do modulo obtemos os numeros separadamente
+        return soma + somadoDigitos(x/10); 
+                    //chama a própria função para acumular com os outros números
+    }
+    
+}
+
+int main (void)
+{
+    int numero;
+    printf("Insira um número: ");
+    scanf("%d", &numero);
+    
+    printf (" Somando os números em %d temos como resultado: %d", numero, somadoDigitos(numero));
+    
+    return 0;
+}
