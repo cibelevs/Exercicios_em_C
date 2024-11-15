@@ -1,0 +1,83 @@
+//Crie um programa em C que faça o cadastro de produtos de um estoque,
+//com as seguintes informações para cada produto:
+//• Código de identificação do produto: representado por um valor inteiro;
+//• Nome do produto: com até 50 caracteres;
+//• Quantidade disponível no estoque: representado por um número inteiro;
+//• Preço de venda: representado por um valor real;
+//a) Defina uma estrutura, denominada produto, que tenha os campos apropriados
+//para guardar as informações do produto.
+//b) Crie um conjunto de N produtos (com N sendo fornecido pelo usuário) e peça ao
+//usuário para entrar com as informações de cada produto.
+//c) Encontre o produto com maior preço de venda.
+//d) Encontre o produto com a maior quantidade disponível no estoque.
+#include<stdio.h>
+#include<string.h>
+
+struct products{
+    char nome[50];
+    int codg;
+    int quantd;
+    float preco;
+};
+
+void cadastro(struct products *produtos)
+{
+    printf("Insira o nome do produto: ");
+    scanf("%s", produtos->nome);
+
+    printf("Insira o codigo do produto: ");
+    scanf("%d", &produtos->codg);
+
+    printf("Insira a quantidade do produto: ");
+    scanf("%d", &produtos->quantd);
+
+    printf("Insira o preco do produto: ");
+    scanf("%f", &produtos->preco);
+}
+void encontra_dados(struct products *produtos, int n)
+{
+    char maior_p[50];
+    char maior_q[50];
+
+    int maiorpreco = 0;
+    int maiorquantd = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (produtos[i].preco > maiorpreco) {
+            maiorpreco = produtos[i].preco;
+            strcpy(maior_p, produtos[i].nome);  // Copia o nome do produto de maior preço
+        }
+
+        if (produtos[i].quantd > maiorquantd) {
+            maiorquantd = produtos[i].quantd;
+            strcpy(maior_q, produtos[i].nome);  // Copia o nome do produto de maior quantidade
+        }
+    }
+
+    printf("Produto de maior preço %s, no valor de %f\n", maior_p, maiorpreco);
+    printf("Produto de maior quantidade %s, no valor de %d\n", maior_q, maiorquantd);
+}
+
+int main (void)
+{
+    int n;
+    printf("Insira a quantidade de produtos para cadastro: ");
+    scanf("%d", &n);
+
+    struct products produtos[n];
+
+    printf("CADASTRANDO PRODUTOS \n");
+    for (int i = 0; i<n; i++) {
+        cadastro(&produtos[i]);
+        printf("\n");
+    }
+
+
+    encontra_dados(produtos, n);
+
+
+
+
+    return 0;
+}
+
