@@ -1,0 +1,38 @@
+#include<stdio.h>
+
+void verifica (char *str1, char *str2)
+{
+   //loop para a primeira string 
+   while (*str1 !='\0')
+   {
+       //criando ponteiros para as duas strings
+       char * inicio_str1 = str1; 
+       char * inicio_str2 = str2;
+       
+       //enquanto as duas strings não terminarem e elas forem iguais, passamos para prox posição
+       while(* inicio_str1 != '\0'&& *inicio_str2 !='\0' && *inicio_str1 == *inicio_str2) {
+           inicio_str1++;
+           inicio_str2++;
+       }
+       
+       //se a primeira string chegar ao final, a substring foi encontrada
+       if(*inicio_str1 == '\0') { 
+           printf("Substring encontrada");
+           return;
+       }
+       str1++; //avança para prox elemento
+   }
+   printf("Não encontrada");
+}
+
+
+int main(void)
+{
+    char str1[10] = "filosofia";
+    char str2[15] = "sofia";
+    
+    verifica(str1, str2);
+
+    
+    return 0;
+}
