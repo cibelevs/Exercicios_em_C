@@ -1,0 +1,32 @@
+#include<stdio.h>
+
+void frac(float num, int *parte_int, int *parte_frac)
+{
+    *parte_int = (int)num; //parte inteira
+    
+    float change = num - *parte_int; //variavél que coleta números após a vírgula
+    *parte_frac = change * 10000; //multiplica por 10000, aumentando 4 casas
+
+    if (*parte_frac % 10 == 0) { //se o último digito decimal for 10, ele será ignorado
+        *parte_frac/=10;
+    }
+}
+
+int main (void)
+{
+    float num = 0;
+    
+    printf("Insira um número decimal: ");
+    scanf("%f", &num);
+    
+    int p_int;
+    int p_frac;
+    
+    frac(num, &p_int, &p_frac);
+    
+    printf("Parte inteira: %d\n", p_int);
+    printf("Parte decimal: %d", p_frac);
+    
+    
+    return 0;
+}
