@@ -1,0 +1,194 @@
+#include <iostream>
+#include <raylib.h>
+#include <deque>
+#include <raymath.h>
+
+using namespace std;
+
+//definindo cores segundo raylib RBGA
+Color green = { 173, 204, 156 ,255 };   
+Color red = {255, 50, 118, 200};
+
+//largura e comprimento da janela(750)
+int celula = 30;
+int tam_celula = 25;
+
+//essa função permite que um evento ocorra segundo um
+//intervalo de tempo
+double atualizacao_tempo = 0;
+bool evento (double intervalo) {
+    //double para trabalhar com milisegundos 
+    double tempo_atual = GetTime();
+    if (tempo_atual - atualizacao_tempo >= intervalo){
+    
+        atualizacao_tempo = tempo_atual;
+        return true;
+    }
+    return false;
+}
+
+bool elment_deque(Vector2 element, deque<Vector2> deque) {
+    for(unsigned int i =0; i<deque.size(); i++){
+        if(Vector2Equals(deque[i], element))
+        return true;
+    }
+   return false;
+}
+
+ 
+ 
+
+class Cobra{
+    public:
+    deque<Vector2> body = {Vector2{6,9}, Vector2{5,9}, Vector2{4,9}};//vetor inicial da cobra com 3 posições
+    Vector2 direction = {1, 0};
+
+    bool aumentar_cobra = false;
+    
+    void desenho() {
+        for ( unsigned int i =0; i< body.size(); i++) {
+            float x = body[i].x;
+            float y = body[i].y;
+            Rectangle segmento = Rectangle{x*celula, y*celula, (float)celula, (float)celula}; //criando dados para variavel da struct retangle
+            DrawRectangleRounded(segmento, 0.5, 6, BLACK); //para criar um retangulo circular
+        }
+    }
+
+    void mover() {
+        body.push_front(Vector2Add(body[0], direction));
+        if(aumentar_cobra == true){
+            aumentar_cobra = false;
+        }
+        else {
+            body.pop_back();
+        }
+
+    }
+};
+
+
+class Comida { 
+
+    public: 
+    Vector2 position;
+    Texture2D textura;
+
+    Comida(deque<Vector2>& CobraCorpo ) {
+        Image imagem = LoadImage("C:/Users/T-GAMER/Downloads/Raylib-CPP-Starter-Template-for-VSCODE-main/imagens/Captura_de_tela_2024-11-12_224036-removebg-preview.png");
+        textura = LoadTextureFromImage(imagem);
+        UnloadImage(imagem);
+        position = GenerateRandomPos(CobraCorpo);
+    }
+
+    ~Comida() {
+        UnloadTexture(textura);
+    }
+
+    void Desenhar() {
+        DrawTexture(textura,position.x * celula, position.y * celula, red);  
+    }
+
+    Vector2 GenerateRandomCell()
+    {
+        float x = GetRandomValue (0, tam_celula - 1);
+        float y = GetRandomValue (0, tam_celula - 1);
+        return Vector2{x, y};
+    }
+
+    Vector2 GenerateRandomPos(deque<Vector2>& CobraCorpo) {
+        Vector2 position = GenerateRandomCell();
+        while(elment_deque(position, CobraCorpo)){
+            position = GenerateRandomCell();
+        }
+        return position;
+    }
+};
+
+
+class Regras_jogo {
+    public:
+
+    Comida comida = Comida(cobra.body);
+    Cobra cobra = Cobra();
+
+    void desenhos() {
+        comida.Desenhar();
+        cobra.desenho();
+    }
+
+    void atualiza() {
+        cobra.mover();
+        comer_comida();
+        colide_parede();
+    }
+
+    void comer_comida() {
+        if(Vector2Equals(cobra.body[0], comida.position)) {
+           comida.position = comida.GenerateRandomPos(cobra.body);
+           cobra.aumentar_cobra = true;
+        }
+    }
+
+
+   
+    void colide_parede()
+    {
+        if(cobra.body[0].x == tam_celula || cobra.body[0].x == tam_celula - 1)
+        {
+            gameover();
+        }
+        if(cobra.body[0].y == tam_celula || cobra.body[0].y ==  tam_celula - 1 ){
+            gameover();
+        }
+    } 
+    
+    void gameover()
+    {
+        cout<<"loser"<<endl;
+    }
+
+
+};
+
+
+int main(void)  {
+    printf("Começando o jogo...");
+    InitWindow(celula*tam_celula, celula*tam_celula,"Jogo da Cobra");
+    SetTargetFPS(60);
+
+    Regras_jogo regras_jogo = Regras_jogo();
+    
+
+    while (WindowShouldClose() == false) {
+        BeginDrawing();
+        
+
+        if (evento(0.35)) {
+           regras_jogo.atualiza();
+        }
+        
+        if (IsKeyPressed(KEY_UP) && regras_jogo.cobra.direction.y != 1) {
+            regras_jogo.cobra.direction = {0, -1};  
+        }
+        if (IsKeyPressed(KEY_DOWN) && regras_jogo.cobra.direction.y != -1) {
+            regras_jogo.cobra.direction = {0, 1};
+        }
+        
+        if (IsKeyPressed(KEY_LEFT) && regras_jogo.cobra.direction.x != 1) {
+           regras_jogo.cobra.direction = {-1, 0}; 
+        }
+        
+        if (IsKeyPressed(KEY_RIGHT) && regras_jogo.cobra.direction.x != -1) {
+            regras_jogo.cobra.direction = {1, 0};
+        }
+        
+        ClearBackground(green);
+        regras_jogo.desenhos();
+        
+        EndDrawing();
+    }
+
+    CloseWindow();
+
+    return 0;
+}
