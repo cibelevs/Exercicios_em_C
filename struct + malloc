@@ -1,0 +1,70 @@
+//Crie um programa em C que declare uma estrutura (registro) para o cadastro
+//de alunos, no qual:
+//• Deverão ser armazenados para cada aluno: matrícula, sobrenome (apenas um),
+//e ano de nascimento;
+//• Ao início do programa, o usuário deverá informar o número de alunos que serão
+//armazenados;
+//• O programa deverá alocar dinamicamente a quantidade necessária de memória
+//para armazenar os registros dos alunos;
+//• O programa deverá pedir ao usuário que entre com as informações dos alunos;
+//• Ao final, mostrar os dados armazenados e liberar a memória alocada.
+#include<stdio.h>
+#include<stdlib.h>
+
+struct Aluno{
+    int matricula;
+    char sobrenome[50];
+    int data_nasc;
+};
+
+void cadastro ( struct Aluno *alunos)
+{
+    printf("Insira sua matricula: ");
+    scanf("%d", &alunos ->matricula); //usando metodo para ponteiros '->'
+
+    printf("Insira seu sobrenome: ");
+    scanf("%s", alunos ->sobrenome); //como string é um array, não precisa de '&'
+
+    printf("Insira sua data de nascimento (ex: 170306): ");
+    scanf("%d", &alunos ->data_nasc); 
+}
+
+void impressao (struct Aluno *alunos, int c)
+{
+    c +=1;
+    printf("Matricula aluno %d: %d \n", c, alunos ->matricula);
+    printf("Sobrenome aluno %d: %s \n", c, alunos->sobrenome);
+    printf("Data de nascimento aluno %d: %d \n", c, alunos->data_nasc);
+    printf("\n");
+}
+
+
+int main()
+{
+    int total = 0;
+    printf("Insira o total de alunos que serao cadastrados: ");
+    scanf("%d", &total); //valor para o vetor da struct alunos
+
+    //criando um vetor usando alocação dinamica
+    struct Aluno * alunos; 
+    alunos = (Aluno *) malloc (sizeof(Aluno) * total);
+    //lembrar que na struct se cria uma variável, logo o sizeof tem que ser dela!
+    
+    if (alunos == NULL){
+        printf("Erro na alocacao");
+        return 1;
+    } //verifica erros 
+
+    for (int i = 0; i<total; i++){
+        cadastro(alunos + i); //chama função para cadastro
+        printf("\n");
+    }
+
+    for (int c = 0; c<total; c++) {
+        impressao(alunos + c, c); //função para impressão
+    }
+
+    free(alunos); //libera a memoria
+
+    return 0;
+}
