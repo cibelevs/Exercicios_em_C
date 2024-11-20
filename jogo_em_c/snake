@@ -1,0 +1,240 @@
+#include <iostream>
+#include <raylib.h>
+#include <deque>
+#include <raymath.h>
+#include<stdbool.h>
+
+using namespace std;
+
+//definindo cores segundo raylib RBGA
+Color green = { 173, 204, 156 ,255 };   
+Color red = {255, 50, 118, 200};
+
+//largura e comprimento da janela(750)
+int celula = 25;
+int tam_celula = 25;
+
+//tam da borda
+int tborda = 75;
+
+//essa função permite que um evento ocorra segundo um
+//intervalo de tempo
+double atualizacao_tempo = 0;
+bool evento (double intervalo) {
+    //double para trabalhar com milisegundos 
+    double tempo_atual = GetTime();
+    if (tempo_atual - atualizacao_tempo >= intervalo){
+    
+        atualizacao_tempo = tempo_atual;
+        return true;
+    }
+    return false;
+}
+
+
+
+bool elment_deque(Vector2 element, deque<Vector2> deque) {
+    for(unsigned int i =0; i<deque.size(); i++){
+        if(Vector2Equals(deque[i], element))
+        return true;
+    }
+   return false;
+}
+
+
+class Cobra{
+    public:
+    deque<Vector2> body = {Vector2{6,9}, Vector2{5,9}, Vector2{4,9}};//vetor inicial da cobra com 3 posições
+    Vector2 direction = {1, 0};
+
+    bool aumentar_cobra = false;
+    
+    void desenho() {
+        for ( unsigned int i =0; i< body.size(); i++) {
+            float x = body[i].x;
+            float y = body[i].y;
+            Rectangle segmento = Rectangle{tborda + x *celula, tborda + y*celula, (float)celula, (float)celula}; //criando dados para variavel da struct retangle
+            DrawRectangleRounded(segmento, 0.5, 6, BLACK); //para criar um retangulo circular
+        }
+    }
+
+    void mover() {
+        body.push_front(Vector2Add(body[0], direction));
+        if(aumentar_cobra == true){
+            aumentar_cobra = false;
+        }
+        else {
+            body.pop_back();
+        }
+
+    }
+    void recomeca(){
+        body = {Vector2{6,9}, Vector2{5, 9}, Vector2{4,9}};
+        direction ={1,0};
+    }
+};
+
+
+class Comida { 
+
+    public: 
+    Vector2 position;
+    Texture2D textura;
+
+    Comida(deque<Vector2>& CobraCorpo ) {
+        Image imagem = LoadImage("C:/Users/T-GAMER/Downloads/ble-removebg-preview.png");
+        textura = LoadTextureFromImage(imagem);
+        UnloadImage(imagem);
+        position = GenerateRandomPos(CobraCorpo);
+    }
+
+    ~Comida() {
+        UnloadTexture(textura);
+    }
+
+    void Desenhar() {
+        DrawTexture(textura,tborda + position.x * celula, tborda + position.y * celula, red);  
+    }
+
+    Vector2 GenerateRandomCell()
+    {
+        float x = GetRandomValue (0, tam_celula - 1);
+        float y = GetRandomValue (0, tam_celula - 1);
+        return Vector2{x, y};
+    }
+
+    Vector2 GenerateRandomPos(deque<Vector2>& CobraCorpo) {
+        Vector2 position = GenerateRandomCell();
+        while(elment_deque(position, CobraCorpo)){
+            position = GenerateRandomCell();
+        }
+        return position;
+    }
+};
+
+
+class Regras_jogo {
+    public:
+
+    Comida comida = Comida(cobra.body);
+    Cobra cobra = Cobra();
+    bool running = true;
+    int score = 0;
+
+    void desenhos() {
+        comida.Desenhar();
+        cobra.desenho();
+    }
+
+    void atualiza() {
+        if (running) {
+            cobra.mover();
+            comer_comida();
+            colide_parede();
+            colisao_cobra();
+        }
+    }
+
+    void comer_comida() {
+        if(Vector2Equals(cobra.body[0], comida.position)) {
+           comida.position = comida.GenerateRandomPos(cobra.body);
+           cobra.aumentar_cobra = true;
+           score++;
+        }
+    }
+    
+
+    void colide_parede()
+    { 
+        if(cobra.body[0].x == tam_celula || cobra.body[0].x == - 1) {
+            gameover();
+        }
+        if(cobra.body[0].y == tam_celula || cobra.body[0].y == - 1 ) {
+            gameover();
+        }
+    } 
+    
+    void gameover()
+    {
+        cobra.recomeca();
+        comida.position = comida.GenerateRandomPos(cobra.body);
+        running = false;
+        //DrawText("Game over", tborda - 5, 40, 40, BLACK);
+        score = 0;
+    }
+
+    void colisao_cobra(){
+        deque<Vector2> copia_corpo = cobra.body;
+        copia_corpo.pop_front();
+        if (elment_deque(cobra.body[0], copia_corpo)){
+            gameover();
+        }
+    }
+
+
+};
+
+
+
+
+
+
+
+int main(void)  {
+    printf("Começando o jogo...");
+    InitWindow( 2*tborda + celula *tam_celula, 2*tborda + celula *tam_celula,"Jogo da Cobra");
+    SetTargetFPS(60);
+
+    Regras_jogo regras_jogo = Regras_jogo();
+    
+
+    while (WindowShouldClose() == false) {
+        BeginDrawing();
+        
+        if(regras_jogo.score >= 2)
+        {
+            if(evento(0.15)){
+                regras_jogo.atualiza();
+            }
+        }
+        else {
+            if (evento(0.55)) {
+                    regras_jogo.atualiza();
+            }
+        }
+        
+        
+        if (IsKeyPressed(KEY_UP) && regras_jogo.cobra.direction.y != 1) {
+            regras_jogo.cobra.direction = {0, -1};  
+            regras_jogo.running = true;
+        }
+        if (IsKeyPressed(KEY_DOWN) && regras_jogo.cobra.direction.y != -1) {
+            regras_jogo.cobra.direction = {0, 1};
+            regras_jogo.running = true;
+        }
+        
+        if (IsKeyPressed(KEY_LEFT) && regras_jogo.cobra.direction.x != 1) {
+           regras_jogo.cobra.direction = {-1, 0}; 
+           regras_jogo.running = true;
+        }
+        
+        if (IsKeyPressed(KEY_RIGHT) && regras_jogo.cobra.direction.x != -1) {
+            regras_jogo.cobra.direction = {1, 0};
+            regras_jogo.running = true;
+        }
+        
+        ClearBackground(green);
+        DrawRectangleLinesEx(Rectangle{(float)tborda - 5,(float)tborda - 5, 
+        (float)celula *tam_celula + 10, (float)celula *tam_celula + 10}, 5, BLACK);
+        DrawText("Snake Extendido", tborda - 5, 20, 40, BLACK);
+        DrawText (TextFormat("Score -> %d", regras_jogo.score), tborda - 5, tborda + celula *tam_celula + 10, 40, BLACK);
+
+        regras_jogo.desenhos();
+        
+        EndDrawing();
+    }
+
+    CloseWindow();
+
+    return 0;
+}
