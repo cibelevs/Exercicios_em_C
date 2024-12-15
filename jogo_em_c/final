@@ -7,9 +7,6 @@
 
 using namespace std;
 
-#define CONTROLE 2
-
-static bool p_movimento = false; //controle para usuário fazer o movimento da cobra
 //definindo cores baseado no RGBA
 Color green = {173, 204, 156, 255};
 Color darkGreen = {43, 51, 24, 255};
@@ -18,6 +15,9 @@ Color darkGreen = {43, 51, 24, 255};
 int celula1 = 25;
 int celula2 = 25;
 int tborda = 75;
+
+#define CONTROLE 2 //velocidade
+static bool p_movimento = false; //controle para usuário fazer o movimento da cobra
 
 //temporizador para controlar a velocidade do jogo e das maças 
 struct Temporizador {
@@ -32,9 +32,9 @@ struct Temporizador {
     }
 };
 
+//declarando variáveis para alterar o tempo
 Temporizador temp_jogo;
 Temporizador temp_comida;
-
 double t = 0.2;
 bool aumenta_velocidade = false;
 
@@ -48,7 +48,7 @@ bool Elemento_Deque(Vector2 elemento, deque<Vector2> deque)
             }
         }
         return false;
-    }
+}
 
 class Cobra
 {
@@ -93,7 +93,7 @@ public:
 
     Comida(deque<Vector2> corpoCobra)
     {
-        Image imagem = LoadImage("C:/Users/T-GAMER/Downloads/Captura_de_tela_2024-11-12_224033-removebg-preview.png");
+        Image imagem = LoadImage("C:/Users/T-GAMER/Downloads/one_apple.png");
         textura = LoadTextureFromImage(imagem);
         UnloadImage(imagem);
         posicao = PosicinarComponente(corpoCobra);
@@ -143,10 +143,11 @@ struct Obstaculo {
     Rectangle parede = {120, 100, (float)celula1, (float)celula1}; 
     vector<Obstaculo*> obstacles; 
 
+
     void gerar_obstaculo(deque<Vector2> corpoCobra) {
     Vector2 novaPosicao;
     // Gera uma posição válida que não colida com a cobra ou outros obstáculos
-    do {
+        do {
         float x = GetRandomValue(0, celula2 - 1) * celula1 + tborda;
         float y = GetRandomValue(0, celula2 - 1) * celula1 + tborda;
         novaPosicao = Vector2{x, y};
@@ -157,7 +158,7 @@ struct Obstaculo {
         obstacles.push_back(new Obstaculo(novaPosicao.x, novaPosicao.y, (float)celula1, (float)celula1));
     }
 
-        // Função auxiliar para verificar colisões com obstáculos existentes
+    // Função auxiliar para verificar colisões com obstáculos existentes
     bool check_obstacle_collision(Vector2 novaPosicao) {
         for (auto& obst : obstacles) {
             if (CheckCollisionRecs(Rectangle{novaPosicao.x, novaPosicao.y, (float)celula1, (float)celula1}, obst->retang)) {
@@ -198,7 +199,6 @@ public:
     bool running = true;
     int score = 0;
 
-
     Rectangle cabeca_cobra = {
             tborda + cobra.corpo[0].x * celula1, // Converte a posição da cabeça para pixels
             tborda + cobra.corpo[0].y * celula1,
@@ -234,6 +234,7 @@ public:
             cobra.Atualiza();
             Aumentar_cobra();
             verifica();
+            Posiciona_comida(troca);
             Colisao_paredes();
             Colisao_cobra();
             if (score % 2 == 0){
@@ -253,26 +254,38 @@ public:
         }
     }
 
-    void verifica() {
-        // Verifica se a comida precisa ser reposicionada
-        for (auto& obst : obstaculo.obstacles) {
-        if (comida.posicao.x >= obst->retang.x && 
-        comida.posicao.x < obst->retang.x + obst->retang.width && 
-        comida.posicao.y >= obst->retang.y && 
-        comida.posicao.y < obst->retang.y + obst->retang.height) {
-        comida.posicao = comida.PosicinarComponente(cobra.corpo);
-        break;
-        }
+
+    bool troca = false;
+    void verifica (){
+        for (auto& obst : obstaculo.obstacles){
+            if (comida.posicao.x == obst->retang.x && comida.posicao.y == obst->retang.y){
+                troca = true;
+            }
+           troca = false;
         }
     }
 
+    void Posiciona_comida(bool fator){
+        if (fator == true){
+            comida.posicao = comida.PosicinarComponente(cobra.corpo);
+        }
+        else{
+            if(temp_comida.evento(6.75))
+            {
+                if (!cobra.aumentarcobra)  // Só troca se a comida não foi comida
+                comida.posicao = comida.PosicinarComponente(cobra.corpo);
+            }
+        }
+
+    }
+  
     void Aumentar_cobra() {
         // Verifica se a cobra consumiu a comida
         if (Vector2Equals(cobra.corpo[0], comida.posicao)) {
             comida.posicao = comida.PosicinarComponente(cobra.corpo);
-            cobra.aumentarcobra = true; // Indica que a cobra deve crescer
-            score++; // Incrementa o placar
-            PlaySound(som_comida); // Reproduz o som de consumo
+            cobra.aumentarcobra = true; 
+            score++; 
+            PlaySound(som_comida); 
         }
     }
     void Colisao_paredes()
@@ -348,11 +361,6 @@ int main()
             aumenta_velocidade = false; // Reseta para próximas verificações
         }
         
-        if(temp_comida.evento(6.75)){
-            if (!game.cobra.aumentarcobra)  // Só troca se a comida não foi comida
-            game.comida.posicao = game.comida.PosicinarComponente(game.cobra.corpo);
-        }
-        
        
         if (IsKeyPressed(KEY_UP) && game.cobra.direcao.y != 1 && p_movimento)
         {
@@ -380,7 +388,8 @@ int main()
         }
 
         ClearBackground(green);
-        DrawRectangleLinesEx(Rectangle{(float)tborda - 5, (float)tborda - 5, (float)celula1 * celula2 + 10, (float)celula1 * celula2 + 10}, 5, darkGreen);
+        DrawRectangleLinesEx(Rectangle{(float)tborda - 5, (float)tborda - 5, (float)celula1
+        * celula2 + 10, (float)celula1 * celula2 + 10}, 5, darkGreen);
         DrawText("Snake Game Extendido", tborda - 5, 20, 40, darkGreen);
         DrawText(TextFormat("Score atual -> %i", game.score), tborda - 5, tborda + celula1 * celula2 + 10, 40, darkGreen);
         game.Draw();
