@@ -142,10 +142,10 @@ struct Obstaculo {
 
     Rectangle parede = {120, 100, (float)celula1, (float)celula1}; 
     vector<Obstaculo*> obstacles; 
-
+   
+    Vector2 novaPosicao;
 
     void gerar_obstaculo(deque<Vector2> corpoCobra) {
-    Vector2 novaPosicao;
     // Gera uma posição válida que não colida com a cobra ou outros obstáculos
         do {
         float x = GetRandomValue(0, celula2 - 1) * celula1 + tborda;
@@ -174,7 +174,6 @@ struct Obstaculo {
             DrawRectangleRec(obst->retang , BLACK);  // Desenha o retângulo
         }
     }
-
     ~Obstacles() {
     for (auto& obst : obstacles) {
         delete obst;
@@ -193,7 +192,7 @@ public:
     Sound som_gameover;
 
     float tempo_pass =0.0f;
-    float interv = 10.0f;
+    float interv = 65.0f;
 
     float time = GetTime();
     bool running = true;
@@ -233,7 +232,7 @@ public:
         {
             cobra.Atualiza();
             Aumentar_cobra();
-            verifica();
+            verifica(comida.posicao, obstaculo.novaPosicao);
             Posiciona_comida(troca);
             Colisao_paredes();
             Colisao_cobra();
@@ -254,15 +253,13 @@ public:
         }
     }
 
-
     bool troca = false;
-    void verifica (){
-        for (auto& obst : obstaculo.obstacles){
-            if (comida.posicao.x == obst->retang.x && comida.posicao.y == obst->retang.y){
+    void verifica (Vector2 comidaposicao, Vector2 obstaculoposicao){
+        int result = Vector2Equals(comida.posicao, obstaculo.novaPosicao);                              
+            if (result == 0 ){
                 troca = true;
             }
            troca = false;
-        }
     }
 
     void Posiciona_comida(bool fator){
