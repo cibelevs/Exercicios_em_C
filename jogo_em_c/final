@@ -4,7 +4,7 @@
 #include<vector>
 #include <raymath.h>
 
-#define TOTAL_BLOCOS 15
+#define TOTAL_BLOCOS 10
 using namespace std;
 
 //definindo cores baseado no RGBA
@@ -143,7 +143,7 @@ struct Obstaculo {
 
     Rectangle parede = {120, 100, (float)celula_tam, (float)celula_tam}; // tam fixo paredes
     vector<Obstaculo*> obstacles; 
-   
+    deque<Vector2> historico_obstaculos;
     Vector2 novaPosicao; // x e y
 
     void gerar_obstaculo(deque<Vector2> corpoCobra) {
@@ -161,9 +161,21 @@ struct Obstaculo {
             check_obstacle_collision(novaPosicao));
         //cria novo obstáculo
         obstacles.push_back(new Obstaculo(novaPosicao.x, novaPosicao.y, (float)celula_tam, (float)celula_tam));
+        
+        
+
+
     }
 
-   
+    void AtualizaPosicaoObstaculo(Vector2 novaPosicao) {
+            // Coloca a posição anterior do obstáculo no histórico
+            historico_obstaculos.push_front(novaPosicao);
+            if (historico_obstaculos.size() > TOTAL_BLOCOS) {
+                historico_obstaculos.pop_back();  // Limita o tamanho do histórico
+            }
+            // Atualiza a posição atual do obstáculo
+            novaPosicao = novaPosicao;
+    }
 
     // Função auxiliar para verificar colisões com obstáculos existentes
     bool check_obstacle_collision(Vector2 novaPosicao) {
@@ -239,7 +251,7 @@ public:
         if (running)
         {
             cobra.Atualiza();
-            Verifica(comida.posicao, obstaculo.novaPosicao); //verifica local da maça
+            Verifica(comida.posicao); //verifica local da maça
             Aumentar_cobra(); 
             Posiciona_comida(troca);
             Colisao_paredes();
@@ -257,11 +269,13 @@ public:
 
     //verifica se a maça esta atras de um obstaculo de lugar
     bool troca = false;
-    void Verifica (Vector2 comidaposicao, Vector2 obstaculoposicao){
-        int result = Vector2Equals(comida.posicao, obstaculo.novaPosicao);                              
-        if (result == 0 ){
-                troca = true;
-            }
+    void Verifica (Vector2 comidaposicao){
+         for (const auto& obst : obstaculo.historico_obstaculos) {
+        if (Vector2Equals(comidaposicao, obst)) {
+            troca = true;
+            return ; // Se a maçã está em uma posição de obstáculo, retorna true
+        }
+    }
         troca = false;
     }
 
