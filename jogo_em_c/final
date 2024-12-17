@@ -251,7 +251,6 @@ public:
         if (running)
         {
             cobra.Atualiza();
-            Verifica(comida.posicao); //verifica local da maça
             Aumentar_cobra(); 
             Posiciona_comida(troca);
             Colisao_paredes();
@@ -294,6 +293,7 @@ public:
     void Aumentar_cobra() {
         // Verifica se a cobra consumiu a comida
         if (Vector2Equals(cobra.corpo[0], comida.posicao)) {
+            Verifica(comida.posicao); //verifica local da maça
             comida.posicao = comida.PosicinarComponente(cobra.corpo);
             cobra.aumentarcobra = true; 
             score++; 
