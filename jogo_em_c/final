@@ -3,8 +3,8 @@
 #include <deque>
 #include<vector>
 #include <raymath.h>
-#include<stdlib.h>
 
+#define TOTAL_BLOCOS 15
 using namespace std;
 
 //definindo cores baseado no RGBA
@@ -12,7 +12,7 @@ Color green = {173, 204, 156, 255};
 Color darkGreen = {43, 51, 24, 255};
 
 //declarando variáveis para tamanho da janela (tbm das paredes)
-int celula1 = 25;
+int celula_tam = 25;
 int celula2 = 25;
 int tborda = 75;
 
@@ -35,6 +35,7 @@ struct Temporizador {
 //declarando variáveis para alterar o tempo
 Temporizador temp_jogo;
 Temporizador temp_comida;
+Temporizador temp_obst;
 double t = 0.2;
 bool aumenta_velocidade = false;
 
@@ -53,23 +54,23 @@ bool Elemento_Deque(Vector2 elemento, deque<Vector2> deque)
 class Cobra
 {
 public:
-    deque<Vector2> corpo = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
+    deque<Vector2> corpo = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}}; //pos inicial
     Vector2 direcao = {1, 0};
     bool aumentarcobra = false;
 
     void Desenho() {
-        for (unsigned int i = 0; i < corpo.size(); i++)
-        {
+        //percorre os segmentos 
+        for (unsigned int i = 0; i < corpo.size(); i++) {
             float x = corpo[i].x;
             float y = corpo[i].y;
-            Rectangle segmento = Rectangle{tborda + x * celula1, tborda + y * celula1, (float)celula1, (float)celula1};
+            Rectangle segmento = Rectangle{tborda + x * celula_tam, tborda + y * celula_tam, (float)celula_tam, (float)celula_tam};
             DrawRectangleRounded(segmento, 0.5, 6, darkGreen);
         }
     }
 
     void Atualiza()
     {
-        corpo.push_front(Vector2Add(corpo[0], direcao));
+        corpo.push_front(Vector2Add(corpo[0], direcao)); //adiciona um elemento
         if (aumentarcobra == true) {
             aumentarcobra = false;
         }
@@ -93,7 +94,7 @@ public:
 
     Comida(deque<Vector2> corpoCobra)
     {
-        Image imagem = LoadImage("C:/Users/T-GAMER/Downloads/one_apple.png");
+        Image imagem = LoadImage("C:/Users/T-GAMER/Documents/game raylib/imagens/one_apple.png");
         textura = LoadTextureFromImage(imagem);
         UnloadImage(imagem);
         posicao = PosicinarComponente(corpoCobra);
@@ -106,7 +107,7 @@ public:
 
     void Desenho()
     {
-        DrawTexture(textura, tborda + posicao.x * celula1, tborda + posicao.y * celula1, RED);
+        DrawTexture(textura, tborda + posicao.x * celula_tam, tborda + posicao.y * celula_tam, RED);
     }
     
     Vector2 GerarComponenteAleatoriamente()
@@ -140,28 +141,34 @@ struct Obstaculo {
         }
     };
 
-    Rectangle parede = {120, 100, (float)celula1, (float)celula1}; 
+    Rectangle parede = {120, 100, (float)celula_tam, (float)celula_tam}; // tam fixo paredes
     vector<Obstaculo*> obstacles; 
    
-    Vector2 novaPosicao;
+    Vector2 novaPosicao; // x e y
 
     void gerar_obstaculo(deque<Vector2> corpoCobra) {
-    // Gera uma posição válida que não colida com a cobra ou outros obstáculos
+        //controle da quantidade de obstaculos
+        if (obstacles.size() >= TOTAL_BLOCOS){
+            return;
+        }
+        
         do {
-        float x = GetRandomValue(0, celula2 - 1) * celula1 + tborda;
-        float y = GetRandomValue(0, celula2 - 1) * celula1 + tborda;
+        // gear posição válida que não colida com a cobra ou outros obstáculos
+        float x = GetRandomValue(0, celula2 - 1) * celula_tam + tborda;
+        float y = GetRandomValue(0, celula2 - 1) * celula_tam + tborda;
         novaPosicao = Vector2{x, y};
-    } while (Elemento_Deque(Vector2{(novaPosicao.x - tborda) / celula1, (novaPosicao.y - tborda) / celula1}, corpoCobra) ||
-             check_obstacle_collision(novaPosicao));
-
-    // Cria um novo obstáculo
-        obstacles.push_back(new Obstaculo(novaPosicao.x, novaPosicao.y, (float)celula1, (float)celula1));
+        } while (Elemento_Deque(Vector2{(novaPosicao.x - tborda) / celula_tam, (novaPosicao.y - tborda) / celula_tam}, corpoCobra) ||
+            check_obstacle_collision(novaPosicao));
+        //cria novo obstáculo
+        obstacles.push_back(new Obstaculo(novaPosicao.x, novaPosicao.y, (float)celula_tam, (float)celula_tam));
     }
+
+   
 
     // Função auxiliar para verificar colisões com obstáculos existentes
     bool check_obstacle_collision(Vector2 novaPosicao) {
         for (auto& obst : obstacles) {
-            if (CheckCollisionRecs(Rectangle{novaPosicao.x, novaPosicao.y, (float)celula1, (float)celula1}, obst->retang)) {
+            if (CheckCollisionRecs(Rectangle{novaPosicao.x, novaPosicao.y, (float)celula_tam, (float)celula_tam}, obst->retang)) {
                 return true;
             }
         }
@@ -176,7 +183,7 @@ struct Obstaculo {
     }
     ~Obstacles() {
     for (auto& obst : obstacles) {
-        delete obst;
+        delete obst; //liberando a memoria
     }
 }
 };
@@ -188,28 +195,29 @@ public:
     Comida comida = Comida(cobra.corpo);
     Obstacles obstaculo = Obstacles();
 
+    //variaveis de som
     Sound som_comida;
     Sound som_gameover;
 
-    float tempo_pass =0.0f;
-    float interv = 65.0f;
+    //variavel de tempo
+    float time = 4.0f;
 
-    float time = GetTime();
+    //controle do jogo e score
     bool running = true;
     int score = 0;
 
     Rectangle cabeca_cobra = {
-            tborda + cobra.corpo[0].x * celula1, // Converte a posição da cabeça para pixels
-            tborda + cobra.corpo[0].y * celula1,
-            (float)celula1,
-            (float)celula1
+            tborda + cobra.corpo[0].x * celula_tam, // Converte a posição da cabeça para pixels
+            tborda + cobra.corpo[0].y * celula_tam,
+            (float)celula_tam,
+            (float)celula_tam
     };
 
     Game()
     {
         InitAudioDevice();
-        som_comida = LoadSound("C:/Users/T-GAMER/Downloads/game raylib/componentes_audio/come_maca.mp3");
-        som_gameover = LoadSound("C:/Users/T-GAMER/Downloads/game raylib/componentes_audio/gameover.mp3");
+        som_comida = LoadSound("C:/Users/T-GAMER/Documents/game raylib/componentes_audio/come_maca.mp3");
+        som_gameover = LoadSound("C:/Users/T-GAMER/Documents/game raylib/componentes_audio/gameover.mp3");
     }
 
     ~Game()
@@ -231,49 +239,42 @@ public:
         if (running)
         {
             cobra.Atualiza();
-            Aumentar_cobra();
-            verifica(comida.posicao, obstaculo.novaPosicao);
+            Verifica(comida.posicao, obstaculo.novaPosicao); //verifica local da maça
+            Aumentar_cobra(); 
             Posiciona_comida(troca);
             Colisao_paredes();
             Colisao_cobra();
-            if (score % 2 == 0){
-                atualizar(time);
-            }
+            Atualizar_obt(time);
         }
     }
 
-     // Função para atualizar o tempo e gerar obstáculos
-    void atualizar(float deltaTime) {
-        tempo_pass += deltaTime;  // Acumula o tempo passado
-
-        // Se o intervalo de tempo tiver passado, gera um novo obstáculo
-        if (tempo_pass >= interv) {
+    // função para atualizar o tempo e gerar obstáculos
+    void Atualizar_obt(float deltaTime) {
+        if(temp_obst.evento(deltaTime)){
             obstaculo.gerar_obstaculo(cobra.corpo);
-            tempo_pass = 0.0f;  // Reinicia o contador de tempo
         }
     }
 
+    //verifica se a maça esta atras de um obstaculo de lugar
     bool troca = false;
-    void verifica (Vector2 comidaposicao, Vector2 obstaculoposicao){
+    void Verifica (Vector2 comidaposicao, Vector2 obstaculoposicao){
         int result = Vector2Equals(comida.posicao, obstaculo.novaPosicao);                              
-            if (result == 0 ){
+        if (result == 0 ){
                 troca = true;
             }
-           troca = false;
+        troca = false;
     }
 
     void Posiciona_comida(bool fator){
         if (fator == true){
-            comida.posicao = comida.PosicinarComponente(cobra.corpo);
+            comida.posicao = comida.PosicinarComponente(cobra.corpo); //troca de lugar
         }
         else{
-            if(temp_comida.evento(6.75))
-            {
-                if (!cobra.aumentarcobra)  // Só troca se a comida não foi comida
+            if(temp_comida.evento(6.75)) {
+                if (!cobra.aumentarcobra)  // Só troca se a comida não foi comida em um intervalo
                 comida.posicao = comida.PosicinarComponente(cobra.corpo);
             }
         }
-
     }
   
     void Aumentar_cobra() {
@@ -288,10 +289,10 @@ public:
     void Colisao_paredes()
     {
         cabeca_cobra = {
-        tborda + cobra.corpo[0].x * celula1,
-        tborda + cobra.corpo[0].y * celula1,
-        (float)celula1,
-        (float)celula1
+        tborda + cobra.corpo[0].x * celula_tam,
+        tborda + cobra.corpo[0].y * celula_tam,
+        (float)celula_tam,
+        (float)celula_tam
         };
 
         // Colisão com a parede (borda fixa)
@@ -309,20 +310,18 @@ public:
     
     void GameOver()
     {
-        cobra.Start_over();
-        comida.posicao = comida.PosicinarComponente(cobra.corpo);
-        running = false;
+        cobra.Start_over(); //pos inicial e tempo inicial
+        running = false; //atualização nao ocorre
         score = 0;
-        obstaculo.obstacles.clear();
+        obstaculo.obstacles.clear(); //tira os obstaculos 
         PlaySound(som_gameover);
     }
 
     void Colisao_cobra()
     {
-        deque<Vector2> corpo_scabeca = cobra.corpo;
-        corpo_scabeca.pop_front();
-        if (Elemento_Deque(cobra.corpo[0], corpo_scabeca))
-        {
+        deque<Vector2> corpo_scabeca = cobra.corpo; 
+        corpo_scabeca.pop_front();//retira a cabeça da cobra
+        if (Elemento_Deque(cobra.corpo[0], corpo_scabeca)) {
             GameOver();
         }
     }
@@ -331,7 +330,7 @@ public:
 int main()
 {
     cout << "Comecando o jogo..." << endl;
-    InitWindow(2 * tborda + celula1 * celula2, 2 * tborda + celula1 * celula2, "Game");
+    InitWindow(2 * tborda + celula_tam * celula2, 2 * tborda + celula_tam * celula2, "Game");
     SetTargetFPS(60);
     Game game = Game();
 
@@ -339,19 +338,17 @@ int main()
     {
         BeginDrawing();
 
-        if (temp_jogo.evento(t)) 
-        {
+        if (temp_jogo.evento(t)) {
             p_movimento = true;
             game.Atualiza();
         }
 
         // Checar se o score é múltiplo de "controle"
-        if (game.score % CONTROLE == 0 && game.score > 0) 
-        {
-            if (!aumenta_velocidade) // Evita aumentar a velocidade mais de uma vez
+        if (game.score % CONTROLE == 0 && game.score > 0) {
+            if (!aumenta_velocidade) // evita aumentar a velocidade dnv
             {
-                t -= 0.01275; // Reduz o tempo para aumentar a velocidade
-                aumenta_velocidade = true; // Marca que a velocidade já foi ajustada
+                t -= 0.01275; 
+                aumenta_velocidade = true; 
             }
         } 
         else {
@@ -385,10 +382,10 @@ int main()
         }
 
         ClearBackground(green);
-        DrawRectangleLinesEx(Rectangle{(float)tborda - 5, (float)tborda - 5, (float)celula1
-        * celula2 + 10, (float)celula1 * celula2 + 10}, 5, darkGreen);
+        DrawRectangleLinesEx(Rectangle{(float)tborda - 5, (float)tborda - 5, (float)celula_tam
+        * celula2 + 10, (float)celula_tam * celula2 + 10}, 5, darkGreen);
         DrawText("Snake Game Extendido", tborda - 5, 20, 40, darkGreen);
-        DrawText(TextFormat("Score atual -> %i", game.score), tborda - 5, tborda + celula1 * celula2 + 10, 40, darkGreen);
+        DrawText(TextFormat("Score atual -> %i", game.score), tborda - 5, tborda + celula_tam * celula2 + 10, 40, darkGreen);
         game.Draw();
 
         EndDrawing();
