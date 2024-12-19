@@ -4,18 +4,18 @@
 #include<vector>
 #include <raymath.h>
 
-#define TOTAL_BLOCOS 10
+#define TOTAL_BLOCOS 8
 using namespace std;
 
 //definindo cores baseado no RGBA
 Color green = {173, 204, 156, 255};
 Color darkGreen = {43, 51, 24, 255};
 
-//declarando variáveis para tamanho da janela (tbm das paredes)
-int tborda = 75;
-float celula2 = 20; // Número de células (dimensão do grid)
-int tamanho_da_tela = 800; // Tamanho da janela em pixels
-int celula_tam = (tamanho_da_tela - 2 * tborda) / celula2; // Tamanho de cada célula
+//declarando variáveis para tamanhos
+int tborda = 95;
+float celula_n = 20; // (dimensão do grid)
+int tamanho_da_tela = 800; 
+int celula_tam = (tamanho_da_tela - 2 * tborda) / celula_n; // Tamanho de cada célula
 
 #define CONTROLE 2 //velocidade
 static bool p_movimento = false; //controle para usuário fazer o movimento da cobra
@@ -23,8 +23,8 @@ static bool p_movimento = false; //controle para usuário fazer o movimento da c
 void DesenhoCampo() {
     float posX = tborda ;
     float posY = tborda ;
-    float largura = celula_tam * celula2 ;
-    float altura = celula_tam * celula2 ;
+    float largura = celula_tam * celula_n ;
+    float altura = celula_tam * celula_n ;
     float espessura = 5;
 
     DrawRectangleLinesEx(Rectangle{posX, posY, largura, altura}, espessura, darkGreen);
@@ -67,8 +67,8 @@ class Cobra
 {
 public:
     //posições iniciais 
-    deque<Vector2> corpo = {Vector2{3, celula2 / 2}, Vector2{2, celula2 / 2}, Vector2{1, celula2 / 2}};
-    deque<Vector2> corpo2 = {Vector2{celula2 - 4, celula2 / 2}, Vector2{celula2 - 3, celula2 / 2}, Vector2{celula2 - 2, celula2 / 2}};
+    deque<Vector2> corpo = {Vector2{3, celula_n / 2 }, Vector2{2, celula_n / 2 }, Vector2{1, celula_n / 2 }};
+    deque<Vector2> corpo2 = {Vector2{celula_n - 4, celula_n / 2 - 1}, Vector2{celula_n - 3, celula_n / 2 - 1}, Vector2{celula_n - 2, celula_n / 2 - 1}};
     //direções
     Vector2 direcao1 = {1, 0};
     Vector2 direcao2 = {-1, 0};
@@ -97,11 +97,11 @@ public:
 
     //função de recomeço
     void Start_over(){
-        corpo = {Vector2{3, celula2 / 2}, Vector2{2, celula2 / 2}, Vector2{1, celula2 / 2}};
+        corpo = {Vector2{3, celula_n / 2 }, Vector2{2, celula_n / 2 }, Vector2{1, celula_n / 2 }};
         direcao1 = {1, 0};
     }
     void Start_over2(){
-        corpo2 = {Vector2{celula2 - 4, celula2 / 2}, Vector2{celula2 - 3, celula2 / 2}, Vector2{celula2 - 2, celula2 / 2}};
+        corpo2 = {Vector2{celula_n - 4, celula_n / 2 - 1}, Vector2{celula_n - 3, celula_n / 2 - 1}, Vector2{celula_n - 2, celula_n / 2 - 1}};
         direcao2 = {- 1, 0};
     }
 };
@@ -132,8 +132,8 @@ public:
     
     Vector2 GerarComponenteAleatoriamente()
     {
-        float x = GetRandomValue(0, celula2 - 1);
-        float y = GetRandomValue(0, celula2 - 1);
+        float x = GetRandomValue(0, celula_n - 1);
+        float y = GetRandomValue(0, celula_n - 1);
         return Vector2{x, y}; //coordenadas x e y aleatorias 
     }
 
@@ -141,7 +141,7 @@ public:
     Vector2 PosicinarComponente(deque<Vector2> corpoCobra, deque<Vector2> corpoCobra2) 
     {
         Vector2 position = GerarComponenteAleatoriamente();
-        while (Elemento_Deque(position, corpoCobra) && Elemento_Deque(position, corpoCobra2))
+        while (Elemento_Deque(position, corpoCobra) || Elemento_Deque(position, corpoCobra2))
         {
             position = GerarComponenteAleatoriamente();
         }
@@ -175,8 +175,8 @@ struct Obstaculo {
         
         do {
         // gear posição válida que não colida com a cobra ou outros obstáculos
-        float x = GetRandomValue(0, celula2 - 1) * celula_tam + tborda;
-        float y = GetRandomValue(0, celula2 - 1) * celula_tam + tborda;
+        float x = GetRandomValue(0, celula_n - 1) * celula_tam + tborda;
+        float y = GetRandomValue(0, celula_n - 1) * celula_tam + tborda;
         novaPosicao = Vector2{x, y};
         } while (Elemento_Deque(Vector2{(novaPosicao.x - tborda) / celula_tam, (novaPosicao.y - tborda) / celula_tam}, corpoCobra) ||
             colisao_com_obstaculo(novaPosicao));
@@ -339,60 +339,55 @@ public:
     }
    void Colisao_paredes()
     {
-    // Atualizando as coordenadas
-    cabeca_cobra = {
-        tborda + cobra.corpo[0].x * celula_tam,
-        tborda + cobra.corpo[0].y * celula_tam,
-        (float)celula_tam,
-        (float)celula_tam
-    };
-    cabeca_cobra2 = {
-        tborda + cobra2.corpo2[0].x * celula_tam,
-        tborda + cobra2.corpo2[0].y * celula_tam,
-        (float)celula_tam,
-        (float)celula_tam
-    };
-
-    // Colisão com a parede (borda fixa)
-    if (cobra.corpo[0].x == celula2 || cobra.corpo[0].x == -1 || 
-        cobra.corpo[0].y == celula2 || cobra.corpo[0].y == -1) {
-        GameOver();
-    }
-    
-    if (cobra2.corpo2[0].x == celula2 || cobra2.corpo2[0].x == -1 || 
-        cobra2.corpo2[0].y == celula2 || cobra2.corpo2[0].y == -1) {
-        GameOver();
-    }
-    
-    // Colisão com os obstáculos (dinamicamente)
-    for (auto& obst : obstaculo.obstacles) {
-        if (CheckCollisionRecs(cabeca_cobra, obst->retang)) {
-            GameOver();
-        }
-        if (CheckCollisionRecs(cabeca_cobra2, obst->retang)) {
-            GameOver();
-        }
-    }
-
-    // Colisão entre as cobras
-    // 1. Verificar se a cabeça da cobra 1 colide com o corpo da cobra 2
-    for (size_t i = 1; i < cobra2.corpo2.size(); i++) { // Ignora a cabeça da cobra 2
-        Rectangle corpo_cobra2 = {
-            tborda + cobra2.corpo2[i].x * celula_tam,
-            tborda + cobra2.corpo2[i].y * celula_tam,
+        // Atualizando as coordenadas
+        cabeca_cobra = {
+            tborda + cobra.corpo[0].x * celula_tam,
+            tborda + cobra.corpo[0].y * celula_tam,
             (float)celula_tam,
             (float)celula_tam
         };
-        if (CheckCollisionRecs(cabeca_cobra, corpo_cobra2)) {
+        cabeca_cobra2 = {
+            tborda + cobra2.corpo2[0].x * celula_tam,
+            tborda + cobra2.corpo2[0].y * celula_tam,
+            (float)celula_tam,
+            (float)celula_tam
+        };
+
+        // Colisão com a parede (borda fixa)
+        if (cobra.corpo[0].x == celula_n || cobra.corpo[0].x == -1 || 
+            cobra.corpo[0].y == celula_n || cobra.corpo[0].y == -1) {
             GameOver();
+        }
+        
+        if (cobra2.corpo2[0].x == celula_n || cobra2.corpo2[0].x == -1 || 
+            cobra2.corpo2[0].y == celula_n || cobra2.corpo2[0].y == -1) {
+            GameOver();
+        }
+        
+        // colisão com os obstáculos (dinamicamente)
+        for (auto& obst : obstaculo.obstacles) {
+            if (CheckCollisionRecs(cabeca_cobra, obst->retang)) {
+                GameOver();
+            }
+            if (CheckCollisionRecs(cabeca_cobra2, obst->retang)) {
+                GameOver();
+            }
+        }
+
+        // colisao cabeca de cobra e corpo de cobra2
+        for (size_t i = 1; i < cobra2.corpo2.size(); i++) { 
+            Rectangle corpo_cobra2 = {
+                tborda + cobra2.corpo2[i].x * celula_tam,
+                tborda + cobra2.corpo2[i].y * celula_tam,
+                (float)celula_tam,
+                (float)celula_tam
+            };
+            if (CheckCollisionRecs(cabeca_cobra, corpo_cobra2)) {
+                GameOver();
+            }
         }
     }
 
-    
-    }
-
-    
-    
     void GameOver()
     {            
         cobra.Start_over(); //pos inicial e tempo inicial
@@ -417,7 +412,7 @@ public:
 int main()
 {
     cout << "Comecando o jogo..." << endl;
-    InitWindow(2 * tborda + celula_tam * celula2, 2 * tborda + celula_tam * celula2, "Game");
+    InitWindow(tamanho_da_tela,tamanho_da_tela, "Game");
     SetTargetFPS(60);
     Game game = Game();
 
@@ -443,14 +438,14 @@ int main()
         }
 
         if (game.running == false && game.over == false){
-            DrawText("Use enter para começar o jogo!", 160, 100, 20, darkGreen);
+            DrawText("Use enter para começar o jogo!", tborda - 5, 70, 20, DARKGREEN);
             if (IsKeyPressed(KEY_ENTER)) {
                 game.running = true;
             }
         }
         if(game.over == true && game.running == false)
         {
-            DrawText("Game Over! Use enter para recomeçar", 150, 100, 20, darkGreen);
+            DrawText("Game Over! Use enter para recomeçar", tborda - 5, 70, 20, DARKGREEN);
             if (IsKeyPressed(KEY_ENTER)) {
                 game.running = true;
             }
@@ -484,7 +479,7 @@ int main()
         ClearBackground(green);
         DesenhoCampo();
         DrawText("Snake Game Extendido", tborda - 5, 20, 40, darkGreen);
-        DrawText(TextFormat("Score atual -> %i", game.score), tborda - 5, tborda + celula_tam * celula2 + 10, 40, darkGreen);
+        DrawText(TextFormat("Score atual -> %i", game.score), tborda - 5, tborda + celula_tam * celula_n + 10, 40, darkGreen);
         game.Draw();
 
         EndDrawing();
