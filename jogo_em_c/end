@@ -4,12 +4,10 @@
 #include <vector>
 #include <raymath.h>
 
-#define TOTAL_BLOCOS 8
-using namespace std;
+#define CONTROLE 2    // velocidade
+#define TOTAL_BLOCOS 5
 
-// definindo cores baseado no RGBA
-Color green = {173, 204, 156, 255};
-Color darkGreen = {43, 51, 24, 255};
+using namespace std;
 
 // declarando variáveis para tamanhos
 int tborda = 95;
@@ -17,24 +15,12 @@ float celula_n = 20; // (dimensão do grid)
 int tamanho_da_tela = 800;
 int celula_tam = (tamanho_da_tela - 2 * tborda) / celula_n; // Tamanho de cada célula
 
-#define CONTROLE 2               // velocidade
+// definindo cores baseado no RGBA
+Color green = {173, 204, 156, 255};
+Color darkGreen = {43, 51, 24, 255};
+
 static bool p_movimento = false; // controle para usuário fazer o movimento da cobra
-
 int score = 0;     // Score atual
-int highScore = 0; // Maior score
-
-const char *scoreFile = "highscore.txt"; // Caminho do arquivo de score
-
-void DesenhoCampo()
-{
-    float posX = tborda;
-    float posY = tborda;
-    float largura = celula_tam * celula_n;
-    float altura = celula_tam * celula_n;
-    float espessura = 5;
-
-    DrawRectangleLinesEx(Rectangle{posX, posY, largura, altura}, espessura, darkGreen);
-}
 
 // temporizador para controlar a velocidade do jogo e das maças
 struct Temporizador
@@ -56,6 +42,18 @@ Temporizador temp_comida;
 Temporizador temp_obst;
 double t = 0.2;
 bool aumenta_velocidade = false;
+
+
+void DesenhoCampo()
+{
+    float posX = tborda;
+    float posY = tborda;
+    float largura = celula_tam * celula_n;
+    float altura = celula_tam * celula_n;
+    float espessura = 5;
+
+    DrawRectangleLinesEx(Rectangle{posX, posY, largura, altura}, espessura, darkGreen);
+}
 
 // Verifica se algum elemento está junto ao corpo da cobra
 bool Elemento_Deque(Vector2 elemento, deque<Vector2> deque)
@@ -201,8 +199,6 @@ public:
         if (historico_obstaculos.size() > TOTAL_BLOCOS){
             historico_obstaculos.pop_back(); // limita o tam de historico
         }
-        // atualiza a posição atual
-        novaPosicao = novaPosicao;
     }
 
     // Função auxiliar para verificar colisões com obstáculos existentes
@@ -264,6 +260,13 @@ public:
         (float)celula_tam,
         (float)celula_tam};
 
+    void AtualizaCabecaCobra() {
+        cabeca_cobra.x = tborda + cobra.corpo[0].x * celula_tam;
+        cabeca_cobra.y = tborda + cobra.corpo[0].y * celula_tam;
+        cabeca_cobra2.x = tborda + cobra2.corpo2[0].x * celula_tam;
+        cabeca_cobra2.y = tborda + cobra2.corpo2[0].y * celula_tam;
+    }
+
     Game()
     {
         InitAudioDevice();
@@ -284,7 +287,6 @@ public:
         DesenhoCampo();
         DrawText("Snake Game Extendido", tborda - 5, 20, 40, darkGreen);
         DrawText(TextFormat("Score atual -> %i", score), tborda - 5, tborda + celula_tam * celula_n + 10, 40, darkGreen);
-        DrawText(TextFormat("Higher score -> %i", highScore), tborda - 5, tborda + celula_tam * celula_n + 50, 40, darkGreen);
         if (running == false && over == false){
             DrawText("Use enter para começar o jogo!", tborda - 5, 70, 20, DARKGREEN);
             if (IsKeyPressed(KEY_ENTER)){
@@ -330,11 +332,8 @@ public:
     void Verifica(Vector2 comidaposicao, Vector2 comida2posicao)
     {
         for (const auto &obst : obstaculo.historico_obstaculos){
-            if (Vector2Equals(comidaposicao, obst) || Elemento_Deque(comidaposicao, cobra.corpo) || Elemento_Deque(comidaposicao, cobra2.corpo2)){
-                troca = true;
-                return;
-            }
-            if (Vector2Equals(comida2posicao, obst) || Elemento_Deque(comida2posicao, cobra.corpo) ||  Elemento_Deque(comida2posicao, cobra2.corpo2)){
+            if (Vector2Equals(comidaposicao, obst) || Elemento_Deque(comidaposicao, cobra.corpo) || Elemento_Deque(comidaposicao, cobra2.corpo2) || 
+                Vector2Equals(comida2posicao, obst) || Elemento_Deque(comida2posicao, cobra.corpo) ||  Elemento_Deque(comida2posicao, cobra2.corpo2)){
                 troca = true;
                 return;
             }
@@ -342,51 +341,59 @@ public:
         troca = false;
     }
 
-    void Posiciona_comida(bool fator)
+   void Posiciona_comida(bool fator)
     {
-        if (fator == true){
+        if (fator == true)
+        {
             comida.posicao = comida.PosicinarComponente(cobra.corpo, cobra2.corpo2); // troca de lugar                    
-            comida2.posicao = comida2.PosicinarComponente(cobra.corpo, cobra2.corpo2); // troca de lugar
+            comida2.posicao = comida2.PosicinarComponente(cobra.corpo, cobra2.corpo2);
         }
-
-        else{
+        else
+        {
             if (temp_comida.evento(6.75)){
-                if (!cobra.aumentarcobra) // Só troca se a comida não foi comida em um intervalo
+                // só troca se a comida não foi comida em um intervalo
+                if (!cobra.aumentarcobra) {
                     comida.posicao = comida.PosicinarComponente(cobra.corpo, cobra2.corpo2);
+                    comida2.posicao = Vector2{celula_n - 1 - comida.posicao.x, celula_n - 1 - comida.posicao.y};
+                    // Inverter a posição da comida1 para a comida2
+                }
             }
         }
     }
 
+    void colocando_maca(){
+        comida.posicao = comida.PosicinarComponente(cobra.corpo, cobra2.corpo2);
+        comida2.posicao = comida.PosicinarComponente(cobra2.corpo2, cobra2.corpo2);
+        Verifica(comida.posicao, comida2.posicao); // verifica local da maça
+        Verifica(comida2.posicao, comida.posicao);
+    }
+
     void Aumentar_cobra()
     {
+        if ((Vector2Equals(cobra.corpo[0], comida.posicao) && Vector2Equals(cobra2.corpo2[0], comida2.posicao)) ||
+            (Vector2Equals(cobra.corpo[0], comida2.posicao) && Vector2Equals(cobra2.corpo2[0], comida.posicao))) {
+            colocando_maca();
+            cobra.aumentarcobra = true;
+            cobra2.aumentarcobra = true;
+            score = score + 2;
+            PlaySound(som_comida);
+        }
         // Verifica se a cobra consumiu a comida
         if (Vector2Equals(cobra.corpo[0], comida.posicao) || Vector2Equals(cobra.corpo[0], comida2.posicao) ||
             Vector2Equals(cobra2.corpo2[0], comida.posicao) || Vector2Equals(cobra2.corpo2[0], comida2.posicao))
         {
-            comida.posicao = comida.PosicinarComponente(cobra.corpo, cobra2.corpo2);
-            comida2.posicao = comida.PosicinarComponente(cobra2.corpo2, cobra2.corpo2);
-            Verifica(comida.posicao, comida2.posicao); // verifica local da maça
-            Verifica(comida2.posicao, comida.posicao);
+            colocando_maca();
             cobra.aumentarcobra = true;
             cobra2.aumentarcobra = true;
             score++;
             PlaySound(som_comida);
         }
+       
     }
     void Colisao_paredes()
     {
         // Atualizando as coordenadas
-        cabeca_cobra = {
-            tborda + cobra.corpo[0].x * celula_tam,
-            tborda + cobra.corpo[0].y * celula_tam,
-            (float)celula_tam,
-            (float)celula_tam};
-        cabeca_cobra2 = {
-            tborda + cobra2.corpo2[0].x * celula_tam,
-            tborda + cobra2.corpo2[0].y * celula_tam,
-            (float)celula_tam,
-            (float)celula_tam};
-
+        AtualizaCabecaCobra();
         // Colisão com a parede (borda fixa)
         if (cobra.corpo[0].x == celula_n || cobra.corpo[0].x == -1 ||
             cobra.corpo[0].y == celula_n || cobra.corpo[0].y == -1){
@@ -425,13 +432,10 @@ public:
 
     void GameOver()
     {
-        if (score > highScore) {
-            highScore = score;
-            SalvarHighScore();
-        }
         cobra.Start_over(); // pos inicial e tempo inicial
         cobra2.Start_over2();
         running = false; // atualização nao ocorre
+        colocando_maca();
         over = true;
         score = 0;
         t = 0.2;
@@ -447,26 +451,7 @@ public:
             GameOver();
         }
     }
-    void CarregarHighScore()
-    {
-        FILE *file = fopen(scoreFile, "r"); // Abre o arquivo para leitura
-        if (file){
-            fscanf(file, "%d", &highScore); // Lê o high score
-            fclose(file);
-        }
-        else {
-            highScore = 0; // Define como 0 se não existir o arquivo
-        }
-    }
-
-    void SalvarHighScore()
-    {
-        FILE *file = fopen(scoreFile, "w"); // Abre o arquivo para escrita
-        if (file) {
-            fprintf(file, "%d", highScore); // Salva o high score no arquivo
-            fclose(file);
-        }
-    }
+    
 };
 
 int main()
@@ -475,7 +460,7 @@ int main()
     InitWindow(tamanho_da_tela, tamanho_da_tela, "Game");
     SetTargetFPS(60);
     Game game = Game();
-    game.CarregarHighScore();
+
     while (WindowShouldClose() == false)
     {
         BeginDrawing();
@@ -487,7 +472,7 @@ int main()
 
         // Checar se o score é múltiplo de "controle"
         if (score % CONTROLE == 0 && score > 0){
-            if (!aumenta_velocidade) // evita aumentar a velocidade dnv
+            if (!aumenta_velocidade) // evita aumentar a velocidade dnv 
             {
                 t -= 0.01275;
                 aumenta_velocidade = true;
